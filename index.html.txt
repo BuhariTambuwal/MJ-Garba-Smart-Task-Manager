@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MJ Garba To-Do List Web App</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:700px;
+    background:white;
+    border-radius:25px;
+    padding:30px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    animation:fadeIn 1s ease;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.header{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.header h1{
+    color:#333;
+    font-size:38px;
+}
+
+.header p{
+    color:gray;
+    margin-top:5px;
+}
+
+.datetime{
+    margin-top:15px;
+    background:#f4f4f4;
+    padding:12px;
+    border-radius:12px;
+    font-weight:bold;
+    color:#555;
+}
+
+.input-section{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.input-section input,
+.input-section select{
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#f1f1f1;
+    font-size:15px;
+    outline:none;
+}
+
+.full-width{
+    grid-column:span 2;
+}
+
+.add-btn{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.add-btn:hover{
+    transform:scale(1.03);
+}
+
+.stats{
+    display:flex;
+    justify-content:space-between;
+    margin:20px 0;
+    font-weight:bold;
+    color:#444;
+}
+
+.task-list{
+    list-style:none;
+}
+
+.task{
+    background:#f8f8f8;
+    margin-bottom:15px;
+    padding:18px;
+    border-radius:18px;
+    transition:0.3s;
+    border-left:8px solid #667eea;
+}
+
+.task:hover{
+    transform:translateX(5px);
+}
+
+.task-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.task-title{
+    font-size:18px;
+    font-weight:bold;
+    color:#333;
+}
+
+.completed{
+    text-decoration:line-through;
+    color:gray;
+}
+
+.task-info{
+    color:#666;
+    margin-bottom:10px;
+    line-height:1.7;
+}
+
+.priority-high{
+    border-left-color:#ff4d4d;
+}
+
+.priority-medium{
+    border-left-color:#ffc107;
+}
+
+.priority-low{
+    border-left-color:#28c76f;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.actions button{
+    border:none;
+    padding:10px 14px;
+    border-radius:10px;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.complete-btn{
+    background:#28c76f;
+}
+
+.edit-btn{
+    background:#ffc107;
+}
+
+.delete-btn{
+    background:#ff4d4d;
+}
+
+.actions button:hover{
+    opacity:0.8;
+    transform:scale(1.05);
+}
+
+.footer{
+    text-align:center;
+    margin-top:25px;
+    color:gray;
+}
+
+@media(max-width:600px){
+
+    .input-section{
+        grid-template-columns:1fr;
+    }
+
+    .full-width{
+        grid-column:span 1;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>MJ Garba</h1>
+        <p>To-Do List Web App</p>
+
+        <div class="datetime" id="liveDateTime"></div>
+    </div>
+
+    <div class="input-section">
+
+        <input type="text" id="taskInput" placeholder="Enter Task" class="full-width">
+
+        <input type="date" id="taskDate">
+
+        <input type="time" id="taskTime">
+
+        <select id="priority">
+            <option value="High">High Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="Low">Low Priority</option>
+        </select>
+
+        <button class="add-btn" onclick="addTask()">Add Task</button>
+
+    </div>
+
+    <div class="stats">
+        <span>Total Tasks: <span id="taskCount">0</span></span>
+        <span>Saved Automatically</span>
+    </div>
+
+    <ul class="task-list" id="taskList"></ul>
+
+    <div class="footer">
+        Designed with HTML, CSS & JavaScript
+    </div>
+
+</div>
+
+<script>
+
+const taskInput = document.getElementById("taskInput");
+const taskDate = document.getElementById("taskDate");
+const taskTime = document.getElementById("taskTime");
+const priority = document.getElementById("priority");
+const taskList = document.getElementById("taskList");
+const taskCount = document.getElementById("taskCount");
+
+function updateDateTime(){
+
+    const now = new Date();
+
+    document.getElementById("liveDateTime").innerHTML =
+    now.toLocaleDateString() + " | " +
+    now.toLocaleTimeString();
+
+}
+
+setInterval(updateDateTime,1000);
+
+updateDateTime();
+
+function addTask(){
+
+    if(taskInput.value.trim() === ""){
+        alert("Please enter a task");
+        return;
+    }
+
+    const task = {
+        text:taskInput.value,
+        date:taskDate.value,
+        time:taskTime.value,
+        priority:priority.value,
+        completed:false
+    };
+
+    createTask(task);
+
+    saveTask(task);
+
+    clearInputs();
+
+    updateCount();
+}
+
+function createTask(task){
+
+    const li = document.createElement("li");
+
+    li.classList.add("task");
+
+    if(task.priority === "High"){
+        li.classList.add("priority-high");
+    }
+    else if(task.priority === "Medium"){
+        li.classList.add("priority-medium");
+    }
+    else{
+        li.classList.add("priority-low");
+    }
+
+    li.innerHTML = `
+
+        <div class="task-top">
+            <div class="task-title ${task.completed ? 'completed' : ''}">
+                ${task.text}
+            </div>
+        </div>
+
+        <div class="task-info">
+            📅 Date: ${task.date || "Not Set"} <br>
+            ⏰ Time: ${task.time || "Not Set"} <br>
+            ⭐ Priority: ${task.priority}
+        </div>
+
+        <div class="actions">
+            <button class="complete-btn">Complete</button>
+            <button class="edit-btn">Edit</button>
+            <button class="delete-btn">Delete</button>
+        </div>
+
+    `;
+
+    const completeBtn = li.querySelector(".complete-btn");
+    const editBtn = li.querySelector(".edit-btn");
+    const deleteBtn = li.querySelector(".delete-btn");
+    const title = li.querySelector(".task-title");
+
+    completeBtn.onclick = () => {
+
+        title.classList.toggle("completed");
+
+        updateLocalStorage();
+    };
+
+    editBtn.onclick = () => {
+
+        const newTask = prompt("Edit Task", title.innerText);
+
+        if(newTask !== null && newTask.trim() !== ""){
+            title.innerText = newTask;
+
+            updateLocalStorage();
+        }
+    };
+
+    deleteBtn.onclick = () => {
+
+        li.remove();
+
+        updateLocalStorage();
+
+        updateCount();
+    };
+
+    taskList.appendChild(li);
+
+    checkReminder(task);
+}
+
+function clearInputs(){
+
+    taskInput.value = "";
+    taskDate.value = "";
+    taskTime.value = "";
+}
+
+function saveTask(task){
+
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    tasks.push(task);
+
+    localStorage.setItem("tasks",JSON.stringify(tasks));
+}
+
+function loadTasks(){
+
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    tasks.forEach(task => {
+
+        createTask(task);
+
+    });
+
+    updateCount();
+}
+
+function updateLocalStorage(){
+
+    const tasks = [];
+
+    document.querySelectorAll(".task").forEach(taskEl => {
+
+        const title =
+        taskEl.querySelector(".task-title").innerText;
+
+        const info =
+        taskEl.querySelector(".task-info").innerText;
+
+        const completed =
+        taskEl.querySelector(".task-title")
+        .classList.contains("completed");
+
+        tasks.push({
+            text:title,
+            date:info.split("Date: ")[1].split("\n")[0].trim(),
+            time:info.split("Time: ")[1].split("\n")[0].trim(),
+            priority:info.split("Priority: ")[1].trim(),
+            completed:completed
+        });
+
+    });
+
+    localStorage.setItem("tasks",JSON.stringify(tasks));
+}
+
+function updateCount(){
+
+    taskCount.innerText =
+    document.querySelectorAll(".task").length;
+}
+
+function checkReminder(task){
+
+    if(task.date && task.time){
+
+        const taskDateTime =
+        new Date(task.date + "T" + task.time);
+
+        const currentTime = new Date();
+
+        const timeDifference =
+        taskDateTime - currentTime;
+
+        if(timeDifference > 0){
+
+            setTimeout(() => {
+
+                alert("Reminder: " + task.text);
+
+            },timeDifference);
+
+        }
+    }
+}
+
+loadTasks();
+
+</script>
+
+</body>
+</html>
